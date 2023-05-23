@@ -1,3 +1,4 @@
+from django.core.mail import send_mail
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -61,6 +62,14 @@ class Order(APIView):
             for item in basket:
                 item.buy = True
                 item.save()
+
+            send_mail(
+                "Your items are framed",
+                "Soon your products will be delivered, the delivery price depends on the city of delivery.\n"
+                "(If your products are still not delivered, then get in touch with us)",
+                "bonafresco@gmail.com",
+                ["bonafresco@gmail.com", request.user.custom_email.email]
+            )
 
             return Response(data=templateForResponse("your order has been placed", True))
         return Response(data=templateForResponse(None, False, "Confirm your email first"), status=400)
