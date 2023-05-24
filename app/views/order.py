@@ -63,10 +63,29 @@ class Order(APIView):
                 item.buy = True
                 item.save()
 
+            products = OrderProduct.objects.filter(basket__user=request.user, order=order)
+            text = ""
+            for item in products:
+                text += f"------------ PRODUCTS ------------\n" \
+                        f"product: {item.basket.product.name}\n" \
+                        f"total price: {item.basket.total} AED\n" \
+                        f"quantity: {item.basket.quantity} {item.basket.product.product_type}\n\n"
+
             send_mail(
-                "Your items are framed",
-                "Soon your products will be delivered, the delivery price depends on the city of delivery.\n"
-                "(If your products are still not delivered, then get in touch with us)",
+                f"Your items are framed",
+                f"Soon your products will be delivered, the delivery price depends on the city of delivery.\n"
+                f"(If your products are still not delivered, then get in touch with us)\n\n"
+                f"created time: {products.last().order.created_at}\n"
+                f"order id: #{products.last().order.order_id}\n"
+                f"total price: {products.last().order.total} AED\n"
+                f"total quantity: {products.last().order.quantity} kg/pcs\n"
+                f"my telephone: {products.last().order.telephone} kg/pcs\n"
+                f"------------ DELIVERY ------------\n"
+                f"delivery price: {products.last().order.delivery_city.delivery_price} AED\n"
+                f"city: {products.last().order.delivery_city.city}\n"
+                f"street: {products.last().order.street}\n"
+                f"home: {products.last().order.home}\n"
+                f"{text}",
                 "bonafresco@gmail.com",
                 ["bonafresco@gmail.com", request.user.custom_email.email]
             )
